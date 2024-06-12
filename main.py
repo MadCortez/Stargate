@@ -3,8 +3,19 @@ import requests
 import zlib
 import sqlite3
 from datetime import datetime, timedelta
+import re
 
 app = Flask(__name__)
+
+# Function to validate date
+def validate_date(date_str):
+    pattern = r'^\d{4}-\d{2}-\d{2}$'
+    return bool(re.match(pattern, date_str))
+    
+# Function to validate number
+def validate_integer(number_str):
+    integer_pattern = r'^[+-]?\d+$'
+    return bool(re.match(integer_pattern, number_str))
 
 # Function to get previous day
 def get_previos_day(date_str):
@@ -86,6 +97,10 @@ def get_dynamics(date, code):
 @app.route('/rates', methods=['GET'])
 def get_rates():
     date = request.args.get('date')
+
+    if not validate_date(date):
+        return make_response(jsonify({"error": "Validation error"}))
+    
     if not date:
         return make_response(jsonify({"error": "Date is required"}), 400)
     
@@ -108,6 +123,10 @@ def get_rates():
 def get_rate_by_code():
     date = request.args.get('date')
     code = request.args.get('code')
+
+    if (not validate_date(date)) or (not validate_integer(code)):
+        return make_response(jsonify({"error": "Validation error"}))
+
     if (not date) or (not code):
         return make_response(jsonify({"error": "Date and code are required"}), 400)
     
