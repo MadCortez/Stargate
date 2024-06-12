@@ -2,8 +2,15 @@ from flask import Flask, request, jsonify, make_response
 import requests
 import zlib
 import sqlite3
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
+
+# Function to get previous day
+def get_previos_day(date_str):
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+    previous_day = date_obj - timedelta(days = 1)
+    return previous_day.strftime("%Y-%m-%d")
 
 # Function to create database sqlite
 def create_database():
@@ -47,6 +54,15 @@ def fetch_currency_rate_by_code(date, code):
         return response.json()
     else:
         return None
+    
+# Function to get dynamics by start_date, end_date and code
+def fetch_dynamics(start_date, end_date, code):
+    url = f"https://www.nbrb.by/api/exrates/rates/dynamics/{code}?startdate={start_date}&enddate={end_date}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
 
 # Function to get all logs
 def get_all_logs():
@@ -56,6 +72,15 @@ def get_all_logs():
     logs = cursor.fetchall()
     conn.close()
     return logs
+
+# Function to get dynamics
+def get_dynamics(date, code):
+    dynamics = fetch_dynamics(get_previos_day(date), date, code)
+    if dynamics:
+        rate_change = dynamics[-1]['Cur_OfficialRate'] - dynamics[0]['Cur_OfficialRate']
+        return rate_change
+    else:
+        return None
 
 # Endpoint with input data
 @app.route('/rates', methods=['GET'])
@@ -90,7 +115,11 @@ def get_rate_by_code():
 
     data = fetch_currency_rate_by_code(date, code)
     if data:
-        response = make_response(jsonify({"status": "success", "data": data}))
+        response_data = {"status": "success", "data": data}
+        dynamics = get_dynamics(date, code)
+        if dynamics is not None:
+            response_data["dynamics"] = dynamics
+        response = make_response(jsonify(response_data))
     else:
         response = make_response(jsonify({"status": "failure", "message": "Data could not be loaded"}))
 
