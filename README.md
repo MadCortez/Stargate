@@ -2,7 +2,7 @@
 
 # National Bank of the Republic of Belarus Api
 
-### Made by Pesstunov Ilya
+### Made by Pestunov Ilya
 
 ## How to get started on Windows
 * Clone this repo
