@@ -2,7 +2,9 @@
 
 # National Bank of the Republic of Belarus Api
 
-## How to get started
+### Made by Pesstunov Ilya
+
+## How to get started on Windows
 * Clone this repo
 ```
 git clone https://github.com/MadCortez/Stargate
@@ -30,7 +32,7 @@ Example: http://localhost:5000/rates?date=2023-06-12
 * To get rate for value by it's code and date use
 ```
 http://localhost:5000/rate?date={date}&code={code}
-Where date in format yyyy-mm-dd, code - int
+Where date in format yyyy-mm-dd, code - number
 Example: http://localhost:5000/rate?date=2023-06-12&code=431
 ```
 * To get logs
